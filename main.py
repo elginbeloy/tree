@@ -4,7 +4,7 @@ import time
 from termcolor import colored
 
 def print_files_in_path(
-  path="/", indent=0, exclude_hidden=False, sleep=False, exclude_names=[]):
+  path="/", indent=0, exclude_hidden=False, sleep=None, exclude_names=[]):
   for file in os.listdir(path):
     if file.startswith("."):
       if exclude_hidden:
@@ -24,8 +24,8 @@ def print_files_in_path(
       continue
 
     if os.path.isdir(file_path):
-      if sleep:
-        time.sleep(0.5)
+      if sleep != None:
+        time.sleep(sleep)
       print((" "*indent) + colored(file, "green", attrs=["bold", "reverse"]))
       print_files_in_path(
         path=file_path,
@@ -40,7 +40,7 @@ def print_files_in_path(
 parser = argparse.ArgumentParser()
 parser.add_argument("--path", default="./", help="The path to start the tree from")
 parser.add_argument("--exclude_hidden", action="store_true", default=False, help="Exclude .hidden files")
-parser.add_argument("--sleep", action="store_true", default=False, help="Sleep after each directory is printed.")
+parser.add_argument("--sleep", type=float, default=None, help="How much time to sleep after each directory is printed. Default is None I.E no sleep.")
 parser.add_argument("--exclude_names", nargs="*", default=[], help="Exclude files with the names")
 parser.add_argument("--verbose", action="store_true", help="Verbose output like hidden files")
 args = parser.parse_args()

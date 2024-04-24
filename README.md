@@ -9,7 +9,7 @@ Files and directories are color-coded for easy identification.
 Run the script with the following command:
 
 ```bash
-python3 file_tree_printer.py --path [path] --exclude_hidden [exclude_hidden] --sleep [sleep] --exclude_names [exclude_names] --verbose [verbose]
+python3 file_tree_printer.py --path [path]
 ```
 
 or add it as an alias to your `.bashrc`, `.zshrc`, or other `.rc` for 
@@ -23,7 +23,7 @@ alias tree="python3 ~/tree/main.py"
 
 - `--path`: The path to start the tree from. Default is the current directory.
 - `--exclude_hidden`: Exclude .hidden files. Default is False.
-- `--sleep`: Sleep after each directory is printed. Default is False.
+- `--sleep`: Determines how much time to sleep after each directory is printed. It's a float value. Default is None I.E no sleep.
 - `--exclude_names`: Exclude files with the names. Provide a space-separated list. Default is an empty list.
 - `--verbose`: Verbose output like if hidden files were omitted. Default is False.
 
