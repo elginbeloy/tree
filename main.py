@@ -17,14 +17,13 @@ def print_files_in_path(
       hidden_messages.append("Not showing excluded file: " + file)
       continue
 
-
     file_path = f"{path}/{file}"
     if file.startswith("_") and not os.path.isdir(file_path):
       print((" "*indent) + colored(file, "yellow"))
       continue
 
     if os.path.isdir(file_path):
-      if sleep != None:
+      if sleep is not None:
         time.sleep(sleep)
       print((" "*indent) + colored(file, "green", attrs=["bold", "reverse"]))
       print_files_in_path(
@@ -35,7 +34,6 @@ def print_files_in_path(
         exclude_names=exclude_names)
     else:
       print((" "*indent) + file)
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--path", default="./", help="The path to start the tree from")
