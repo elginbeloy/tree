@@ -3,22 +3,24 @@ import argparse
 import time
 from termcolor import colored
 
+# Take a file size in bytes and return KB, MB or GB
 def get_size_str(file_size_bytes):
-  if file_size_bytes >= 1000000000:  # 1GB
+  if file_size_bytes >= 1000000000:
     file_size_gigabytes = file_size_bytes / (1000 * 1000 * 1000)
     file_size_gigabytes = round(file_size_gigabytes * 100) / 100
     return str(file_size_gigabytes) + "GB"
-  elif file_size_bytes >= 1000000: # 1MB
+  elif file_size_bytes >= 1000000:
     file_size_megabytes = file_size_bytes / (1000 * 1000)
     file_size_megabytes = round(file_size_megabytes * 100) / 100
     return str(file_size_megabytes) + "MB"
-  elif file_size_bytes >= 1000:  # 1KB
+  elif file_size_bytes >= 1000:
     file_size_kilobytes = file_size_bytes / 1000
     file_size_kilobytes = round(file_size_kilobytes * 100) / 100
     return str(file_size_kilobytes) + "KB"
   else:
     return str(file_size_bytes) + "B"
 
+# Recursively walk the directory tree while returning size of terminal nodes
 def print_files_in_path(
   path="/", indent=0, exclude_hidden=False, sleep=None, exclude_names=[], current_depth=0, max_depth=None):
   total_size = 0
@@ -37,6 +39,14 @@ def print_files_in_path(
 
     file_path = f"{path}/{file}"
     file_size_bytes = os.path.getsize(file_path)
+
+    # Handle symbolic links
+    if os.path.islink(file_path):
+      link_target = os.readlink(file_path)
+      total_size += file_size_bytes
+      print((" "*indent) + colored(file + " -> " + link_target, "magenta"), end="")
+      print("  [" + colored(get_size_str(file_size_bytes), "blue") + "]")
+      continue
 
     if file.startswith("_") and not os.path.isdir(file_path):
       print((" "*indent) + colored(file, "yellow"), end="")
