@@ -38,15 +38,20 @@ def print_files_in_path(
       continue
 
     file_path = f"{path}/{file}"
-    file_size_bytes = os.path.getsize(file_path)
 
     # Handle symbolic links
     if os.path.islink(file_path):
       link_target = os.readlink(file_path)
-      total_size += file_size_bytes
-      print((" "*indent) + colored(file + " -> " + link_target, "magenta"), end="")
-      print("  [" + colored(get_size_str(file_size_bytes), "blue") + "]")
+      if os.path.exists(file_path):
+        file_size_bytes = os.path.getsize(file_path)
+        total_size += file_size_bytes
+        print((" "*indent) + colored(file + " -> " + link_target, "magenta"), end="")
+        print("  [" + colored(get_size_str(file_size_bytes), "blue") + "]")
+      else:
+        print((" "*indent) + colored(file + " -> " + link_target, "red", attrs=["bold"]) + "  [BROKEN LINK]")
       continue
+
+    file_size_bytes = os.path.getsize(file_path)
 
     if file.startswith("_") and not os.path.isdir(file_path):
       print((" "*indent) + colored(file, "yellow"), end="")
