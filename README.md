@@ -1,35 +1,29 @@
 ## Directory Tree Printer
 
 This script prints out a file tree starting from a specified path.
-The output includes directories, regular files, and optionally hidden files.
-Files and directories are color-coded for easy identification.
+The output includes directories, files, bytes for each, and 
+optionally hidden files as well. Files and directories are color-coded 
+for easy identification. You can limit the recursion depth and make it
+print out at a custom speed for a cool visual all using flags.
 
 ### Usage
 
-Run the script with the following command:
+Run the python script with the following command:
 
 ```bash
-python3 file_tree_printer.py --path [path]
+python main.py --path [path]
 ```
 
-or add it as an alias to your `.bashrc`, `.zshrc`, or other `.rc` for 
+Use the `--help` flag for a list of options and usage information.
+
+### As A Command
+
+You can add it as an alias to your `.bashrc`, `.zshrc`, etc... for 
 quick usage in your cli as the default path is the current directory.
 
 ```bash
 alias tree="python3 ~/tree/main.py"
 ```
-
-### Arguments
-
-- `--path`: The path to start the tree from. Default is the current directory.
-- `--exclude_hidden`: Exclude .hidden files. Default is False.
-- `--sleep`: Determines how much time to sleep after each directory is printed. It's a float value. Default is None I.E no sleep.
-- `--exclude_names`: Exclude files with the names. Provide a space-separated list. Default is an empty list.
-- `--verbose`: Verbose output like if hidden files were omitted. Default is False.
-
-### Output
-
-The script prints out the file tree, with directories and files color-coded. If `--verbose` is set to True, it also prints out messages about hidden and excluded files.
 
 ### Dependencies
 
