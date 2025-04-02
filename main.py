@@ -1,4 +1,5 @@
 import os
+from time import sleep
 from argparse import ArgumentParser
 
 
@@ -43,7 +44,7 @@ def colored(text, color):
 
 def print_files_in_path(
   path="/", prefix="", exclude_hidden=False,
-  sleep=None, exclude_names=[], current_depth=0, max_depth=None):
+  sleep_time=None, exclude_names=[], current_depth=0, max_depth=None):
   total_size = 0
 
   if max_depth is not None and current_depth > max_depth:
@@ -83,14 +84,14 @@ def print_files_in_path(
       continue
 
     if os.path.isdir(file_path):
-      if sleep is not None:
-        time.sleep(sleep)
+      if sleep_time is not None:
+        sleep(sleep_time)
       print(prefix + connector + colored(file, "green"))
       dir_size = print_files_in_path(
         path=file_path,
         prefix=next_prefix,
         exclude_hidden=exclude_hidden,
-        sleep=sleep,
+        sleep_time=sleep_time,
         exclude_names=exclude_names,
         current_depth=current_depth+1,
         max_depth=max_depth)
@@ -145,7 +146,7 @@ if __name__ == "__main__":
   print_files_in_path(
     args.path,
     exclude_hidden=args.exclude_hidden,
-    sleep=args.sleep,
+    sleep_time=args.sleep,
     exclude_names=args.exclude_names,
     max_depth=args.max_depth)
 
