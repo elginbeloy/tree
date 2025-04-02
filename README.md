@@ -19,12 +19,8 @@ Use the `--help` flag for a list of options and usage information.
 ### As A Command
 
 You can add it as an alias to your `.bashrc`, `.zshrc`, etc... for 
-quick usage in your cli as the default path is the current directory.
+quick usage in your CLI (the default path is the current directory).
 
 ```bash
 alias tree="python3 ~/tree/main.py"
 ```
-
-### Dependencies
-
-This script requires the `os`, `argparse`, `time`, and `termcolor` modules.
