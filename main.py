@@ -1,9 +1,15 @@
 import os
-import argparse
-import time
-from termcolor import colored
+from argparse import ArgumentParser
 
-# Take a file size in bytes and return KB, MB or GB
+
+vert = "│"
+vert_with_horz = "├"
+horz = "─"
+
+connector = f"{vert_with_horz}{horz}{horz} "
+indent_str = f"{vert}   "
+
+
 def get_size_str(file_size_bytes):
   if file_size_bytes >= 1000000000:
     file_size_gigabytes = file_size_bytes / (1000 * 1000 * 1000)
@@ -20,12 +26,30 @@ def get_size_str(file_size_bytes):
   else:
     return str(file_size_bytes) + "B"
 
-# Recursively walk the directory tree while returning size of terminal nodes
+
+def colored(text, color):
+  colors = {
+    "red": "\033[31m",
+    "green": "\033[32m",
+    "yellow": "\033[33m",
+    "blue": "\033[34m",
+    "magenta": "\033[35m",
+    "cyan": "\033[36m",
+  }
+
+  color_code = colors.get(color.lower())
+  return f"{color_code}{text}\033[0m"
+
+
 def print_files_in_path(
-  path="/", indent=0, exclude_hidden=False, sleep=None, exclude_names=[], current_depth=0, max_depth=None):
+  path="/", prefix="", exclude_hidden=False,
+  sleep=None, exclude_names=[], current_depth=0, max_depth=None):
   total_size = 0
+
   if max_depth is not None and current_depth > max_depth:
     return total_size
+
+  next_prefix = prefix + indent_str
 
   for file in sorted(os.listdir(path) or []):
     if file.startswith("."):
@@ -41,66 +65,90 @@ def print_files_in_path(
 
     # Handle symbolic links
     if os.path.islink(file_path):
-      link_target = os.readlink(file_path)
+      link_target = readlink(file_path)
       if os.path.exists(file_path):
         file_size_bytes = os.path.getsize(file_path)
         total_size += file_size_bytes
-        print((" "*indent) + colored(file + " -> " + link_target, "magenta"), end="")
+        print(prefix + connector + colored(file + " -> " + link_target, "magenta"), end="")
         print("  [" + colored(get_size_str(file_size_bytes), "blue") + "]")
       else:
-        print((" "*indent) + colored(file + " -> " + link_target, "red", attrs=["bold"]) + "  [BROKEN LINK]")
+        print(prefix + connector + colored(file + " -> " + link_target, "red") + "  [BROKEN LINK]")
       continue
 
     file_size_bytes = os.path.getsize(file_path)
 
     if file.startswith("_") and not os.path.isdir(file_path):
-      print((" "*indent) + colored(file, "yellow"), end="")
-      print("  [" + colored(get_size_str(file_size_bytes) + "KB", "blue") + "]")
+      print(prefix + connector + colored(file, "yellow"), end="")
+      print("  [" + colored(get_size_str(file_size_bytes), "blue") + "]")
       continue
 
     if os.path.isdir(file_path):
       if sleep is not None:
         time.sleep(sleep)
-      print((" "*indent) + colored(file, "green", attrs=["bold", "reverse"]) + " {")
+      print(prefix + connector + colored(file, "green"))
       dir_size = print_files_in_path(
         path=file_path,
-        indent=indent+4,
+        prefix=next_prefix,
         exclude_hidden=exclude_hidden,
         sleep=sleep,
         exclude_names=exclude_names,
         current_depth=current_depth+1,
         max_depth=max_depth)
       total_size += dir_size
-      print((" "*indent) + "}" + "  [" + colored("TOTAL DIR SIZE: " + get_size_str(dir_size), "blue", attrs=["reverse"]) + "]")
+      print(next_prefix + "[" + colored("TOTAL DIR SIZE: " + get_size_str(dir_size), "blue") + "]")
     else:
       total_size += file_size_bytes
-      print((" "*indent) + file, end="")
+      print(prefix + connector + file, end="")
       print("  [" + colored(get_size_str(file_size_bytes), "blue") + "]")
 
   return total_size
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--path", default="./", help="The path to start the tree from")
-parser.add_argument("--exclude_hidden", action="store_true", default=False, help="Exclude .hidden files")
-parser.add_argument("--sleep", type=float, default=None, help="How much time to sleep after each directory is printed. Default is None I.E no sleep.")
-parser.add_argument("--exclude_names", nargs="*", default=[], help="Exclude files with the names")
-parser.add_argument("--max_depth", type=int, default=None, help="Limit how many directories deep the search goes. Default is no limit.")
-parser.add_argument("--verbose", action="store_true", help="Verbose output like hidden files")
-args = parser.parse_args()
 
-hidden_messages = []
-print(colored("Running Tree: ", "green", attrs=["bold"]), end="")
-print(f"verbose={args.verbose} ", end="| ")
-print(f"exclude_hidden={args.exclude_hidden} ", end="| ")
-print(f"exclude_names={args.exclude_names} ", end="| ")
-print(f"max_recursion_depth={args.max_depth}")
-print_files_in_path(
-  args.path,
-  exclude_hidden=args.exclude_hidden,
-  sleep=args.sleep,
-  exclude_names=args.exclude_names,
-  max_depth=args.max_depth)
+if __name__ == "__main__":
+  parser = ArgumentParser()
+  parser.add_argument(
+    "--path",
+    default="./",
+    help="The path to start the tree from")
+  parser.add_argument(
+    "--exclude_hidden",
+    action="store_true",
+    default=False,
+    help="Exclude .hidden files")
+  parser.add_argument(
+    "--sleep",
+    type=float,
+    default=None,
+    help="Number of seconds to sleep after each directory is printed. Default is 0.")
+  parser.add_argument(
+    "--exclude_names",
+    nargs="*",
+    default=[],
+    help="Exclude files with the names")
+  parser.add_argument(
+    "--max_depth",
+    type=int,
+    default=None,
+    help="Limit how many directories deep the search goes. Default is no limit.")
+  parser.add_argument(
+    "--verbose",
+    action="store_true",
+    help="Verbose output like hidden files")
+  args = parser.parse_args()
 
-if args.verbose:
-  for msg in hidden_messages:
-    print(colored(msg, "red", attrs=["bold"]))
+  hidden_messages = []
+  print(colored("Running Tree: ", "green"), end="")
+  print(f"verbose={args.verbose} ", end="| ")
+  print(f"exclude_hidden={args.exclude_hidden} ", end="| ")
+  print(f"exclude_names={args.exclude_names} ", end="| ")
+  print(f"max_recursion_depth={args.max_depth}")
+  print_files_in_path(
+    args.path,
+    exclude_hidden=args.exclude_hidden,
+    sleep=args.sleep,
+    exclude_names=args.exclude_names,
+    max_depth=args.max_depth)
+
+  if args.verbose:
+    for msg in hidden_messages:
+      print(colored(msg, "red"))
