@@ -6,7 +6,6 @@ from argparse import ArgumentParser
 vert = "│"
 vert_with_horz = "├"
 horz = "─"
-
 connector = f"{vert_with_horz}{horz}{horz} "
 indent_str = f"{vert}   "
 
@@ -66,7 +65,7 @@ def print_files_in_path(
 
     # Handle symbolic links
     if os.path.islink(file_path):
-      link_target = readlink(file_path)
+      link_target = os.readlink(file_path)
       if os.path.exists(file_path):
         file_size_bytes = os.path.getsize(file_path)
         total_size += file_size_bytes
